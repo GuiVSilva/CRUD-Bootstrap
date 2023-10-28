@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Bootstrap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body onload="listarClientes()">
+    <div class="container">
+        <div class="row  mt-4">
+            <div class="col-8">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Pesquisar</label>
+                    <input type="text" class="form-control" id="txtPesquisar">
+                  </div>
+            </div>
+            <div class="col-4" style="margin-top: 30px;">
+                <button type="button" class="btn btn-primary" onclick="pesquisar()"><i class="bi bi-search"></i> Pesquisar</button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cadastroCliente"><i class="bi bi-plus"></i>Novo</button>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Ações</th>
+                  </tr>
+                </thead>
+                <tbody class="table-group-divider" id="tbody">
+                </tbody>
+              </table>
+        </div>
+    </div>
+        
+    <!-- Modal -->
+    <div class="modal fade" id="cadastroCliente" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Cadastro de Cliente</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="txtNome" placeholder="Digite seu nome">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="txtEmail" placeholder="Digite seu email">
+                </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary" onclick="salvar()">Salvar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="editarCliente" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Cliente</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="txtNomeEditar" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="txtNomeEditar">
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtEmailEditar" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="txtEmailEditar">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvarEdicao" onclick="salvarEdicao()">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        let clientes = []
+        const url = "https://6533083dd80bd20280f63a75.mockapi.io/cliente"
+
+        function salvar(){
+            const nome = document.querySelector('#txtNome').value
+            const email = document.querySelector('#txtEmail').value
+            let json = (nome, email)
+
+            fetch(url, {
+                method: 'POST', 
+                headers: {'Content-Type' : 'application/json'},
+                body : JSON.stringify(json)
+            }).then(value => {
+                alert('Inserido com Sucesso!')
+                listarClientes()
+            })
+        }
+
+        function listarClientes(){
+            fetch(url).then(resposta => resposta.json())
+            .then(valor => {
+                clientes = valor
+                carregarTabela(clientes)
+            })
+        }
+        function carregarTabela(clientes){
+            let tbody = document.querySelector("tbody")
+            tbody.textContent = ""
+            clientes.forEach(cli => {
+                let tr = document.createElement('tr')
+                let thId = document.createElement('th')
+                let tdNome = document.createElement('td')
+                let tdEmail = document.createElement('td')
+                let tdAcoes = document.createElement('td')
+
+                thId.textContent = cli.id
+                tdNome.textContent = cli.nome
+                tdEmail.textContent = cli.email
+
+
+                let btnExcluir = document.createElement('button');
+                btnExcluir.textContent = 'Excluir';
+                btnExcluir.classList.add('btn', 'btn-danger', 'me-5');
+                btnExcluir.innerHTML = '<i class="bi bi-trash"></i> Excluir';
+                btnExcluir.addEventListener('click', () => excluirCliente(cli.id));
+                tdAcoes.appendChild(btnExcluir);
+
+                let btnAlterar = document.createElement('button');
+                btnAlterar.textContent = 'Alterar';
+                btnAlterar.classList.add('btn', 'btn-success');
+                btnAlterar.innerHTML = '<i class="bi bi-pencil"></i> Alterar';
+                btnAlterar.addEventListener('click', () => abrirModalEditar(cli));
+                tdAcoes.appendChild(btnAlterar);
+
+
+                tdAcoes.appendChild(btnExcluir);
+                tdAcoes.appendChild(btnAlterar);
+                tr.appendChild(thId)
+                tr.appendChild(tdNome)
+                tr.appendChild(tdEmail)
+                tr.appendChild(tdAcoes)
+                tbody.appendChild(tr)
+            });
+        }
+
+        function pesquisar(){
+            let texto = document.querySelector("#txtPesquisar").value
+            let clientesFiltrados = clientes.filter(cli => cli.nome.includes(texto) || cli.email.includes(texto))
+            carregarTabela(clientesFiltrados)
+        }
+
+        function excluirCliente(id) {
+        fetch(url + '/' + id, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Cliente excluído com sucesso!');
+            listarClientes();
+        })
+        .catch(error => console.error('Erro ao excluir o cliente:', error));
+        }
+
+        function abrirModalEditar(cliente) {
+        document.querySelector('#txtNomeEditar').value = cliente.nome;
+        document.querySelector('#txtEmailEditar').value = cliente.email;
+       
+        const btnSalvarEdicao = document.querySelector('#btnSalvarEdicao');
+        btnSalvarEdicao.dataset.clienteId = cliente.id;
+
+        const modalEditar = new bootstrap.Modal(document.getElementById('editarCliente'));
+        modalEditar.show();
+        }
+
+        function salvarEdicao() {
+            const novoNome = document.querySelector('#txtNomeEditar').value;
+            const novoEmail = document.querySelector('#txtEmailEditar').value;
+            const clienteId = document.querySelector('#btnSalvarEdicao').dataset.clienteId;
+            
+
+            const dadosAtualizados = {
+                nome: novoNome,
+                email: novoEmail
+            };
+
+            fetch(`${url}/${clienteId}`, {
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json'
+            },
+        body: JSON.stringify(dadosAtualizados)
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Cliente atualizado com sucesso!');
+                const modalEditar = new bootstrap.Modal(document.getElementById('editarCliente'));
+                modalEditar.hide();
+                listarClientes();
+            } else {
+                throw new Error('Erro ao atualizar cliente');
+            }
+        })
+        .catch(error => console.error('Erro ao atualizar o cliente:', error));
+}
+
+
+    </script>
+</body>
+</html>
